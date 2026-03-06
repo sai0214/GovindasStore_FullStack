@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><title>Cart | Govindas Store</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="top-nav">
+        <h3 style="margin:0;">Shopping Cart 🛒</h3>
+        <a href="store.html" style="text-decoration:none; color: var(--primary); font-weight:bold;">← Keep Shopping</a>
+    </header>
+
+    <div class="container">
+        <div class="glass-card">
+            <table id="cart-table">
+                <thead>
+                    <tr><th>Product</th><th>Price</th><th>Qty</th><th>Subtotal</th><th>Action</th></tr>
+                </thead>
+                <tbody id="cart-body"></tbody>
+            </table>
+            
+            <div style="margin-top: 2rem; display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #f1f5f9; padding-top: 1.5rem;">
+                <button class="btn btn-danger" onclick="clearCart()">Empty Cart</button>
+                <div style="text-align: right;">
+                    <p style="color: var(--text-muted); margin:0;">Grand Total</p>
+                    <h2 style="margin:0; color: var(--secondary);">₹<span id="cart-total">0</span></h2>
+                    <button class="btn btn-primary" style="margin-top: 1rem;" onclick="checkout()">Proceed to Checkout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        window.onload = loadCart;
+
+        async function loadCart() {
+            const res = await fetch(`${API_URL}/cart/view`, { headers: App.getHeaders() });
+            if(res.ok) {
+                const items = await res.json();
+                const tbody = document.getElementById('cart-body');
+                let total = 0;
+
+                if(items.length === 0) {
+                    tbody.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:3rem;'>Your cart is empty.</td></tr>";
+                    return;
+                }
+
+                tbody.innerHTML = items.map(item => {
+                    const sub = item.product.price * item.quantity;
+                    total += sub;
+                    return `
+                        <tr>
+                            <td><b>${item.product.name}</b></td>
+                            <td>₹${item.product.price}</td>
+                            <td>${item.quantity}</td>
+                            <td>₹${sub}</td>
+                            <td><button class="btn btn-danger" onclick="removeItem(${item.id})">Remove</button></td>
+                        </tr>`;
+                }).join('');
+                document.getElementById('cart-total').innerText = total;
+            }
+        }
+
+        async function removeItem(id) {
+            const res = await fetch(`${API_URL}/cart/remove/${id}`, { method: 'DELETE', headers: App.getHeaders() });
+            if(res.ok) loadCart();
+        }
+
+        async function clearCart() {
+            if(!confirm("Clear all items?")) return;
+            const res = await fetch(`${API_URL}/cart/clear`, { method: 'DELETE', headers: App.getHeaders() });
+            if(res.ok) loadCart();
+        }
+
+        async function checkout() {
+            const res = await fetch(`${API_URL}/orders/place`, { method: 'POST', headers: App.getHeaders() });
+            if(res.ok) {
+                alert("Order Placed Successfully! 🚩");
+                window.location.href = "orders.html";
+            }
+        }
+    </script>
+</body>
+</html>

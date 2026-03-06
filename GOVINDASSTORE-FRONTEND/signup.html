@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Account | Govindas Store</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .auth-wrapper { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .auth-card { width: 400px; padding: 2.5rem; text-align: center; }
+        select.btn { text-align: left; background: white; cursor: pointer; color: var(--text-muted); }
+    </style>
+</head>
+<body class="auth-wrapper">
+    <div class="glass-card auth-card">
+        <h2 style="color: var(--primary); margin-top:0;">Join Govindas Store 🚩</h2>
+        <p style="color: var(--text-muted); margin-bottom: 2rem;">Create an account to start shopping</p>
+        
+        <div id="signup-message" style="margin-bottom: 1rem; font-size: 0.9rem; font-weight: bold;"></div>
+
+        <input type="email" id="signup-email" placeholder="Email Address" class="btn" style="width:100%; border:1px solid #ddd; margin-bottom: 1rem;">
+        <input type="password" id="signup-password" placeholder="Create Password" class="btn" style="width:100%; border:1px solid #ddd; margin-bottom: 1rem;">
+        
+        <label style="display: block; text-align: left; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px;">Select Account Role</label>
+        <select id="signup-role" class="btn" style="width:100%; border:1px solid #ddd; margin-bottom: 1.5rem;">
+            <option value="USER">Standard Customer</option>
+            <option value="ADMIN">Store Administrator</option>
+        </select>
+        
+        <button class="btn btn-primary" onclick="handleSignup()">Register Account</button>
+        
+        <p style="margin-top: 2rem; font-size: 0.9rem;">Already a member? <a href="login.html" style="color: var(--primary); text-decoration:none; font-weight:bold;">Login here</a></p>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        async function handleSignup() {
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const role = document.getElementById('signup-role').value;
+            const msg = document.getElementById('signup-message');
+
+            try {
+                const response = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, role })
+                });
+
+                if (response.ok) {
+                    msg.style.color = "var(--secondary)";
+                    msg.innerText = "Registration Successful! Redirecting...";
+                    setTimeout(() => window.location.href = "login.html", 1500);
+                } else {
+                    msg.style.color = "var(--danger)";
+                    msg.innerText = "Registration failed. Email might already exist.";
+                }
+            } catch (e) {
+                msg.style.color = "var(--danger)";
+                msg.innerText = "Connection error. Is the server running?";
+            }
+        }
+    </script>
+</body>
+</html>

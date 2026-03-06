@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><title>Login | Govindas Store</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .auth-wrapper { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .auth-card { width: 400px; padding: 2.5rem; text-align: center; }
+        .social-btn { display: flex; align-items: center; justify-content: center; gap: 10px; background: #24292e; color: white; text-decoration: none; padding: 0.75rem; border-radius: 8px; margin-top: 1.5rem; font-weight: 600; }
+        .divider { margin: 1.5rem 0; color: var(--text-muted); font-size: 0.85rem; display: flex; align-items: center; gap: 10px; }
+        .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: #e2e8f0; }
+    </style>
+</head>
+<body class="auth-wrapper">
+    <div class="glass-card auth-card">
+        <h2 style="color: var(--primary); margin-top:0;">Welcome Back 🚩</h2>
+        <p style="color: var(--text-muted); margin-bottom: 2rem;">Login to access your store</p>
+        
+        <input type="email" id="email" placeholder="Email Address" class="btn" style="width:100%; border:1px solid #ddd; margin-bottom: 1rem;">
+        <input type="password" id="password" placeholder="Password" class="btn" style="width:100%; border:1px solid #ddd; margin-bottom: 1rem;">
+        
+        <button class="btn btn-primary" onclick="handleLogin()">Login to Account</button>
+        
+        <div class="divider">OR</div>
+        
+        <a href="http://localhost:8080/oauth2/authorization/github" class="social-btn">
+            <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" style="width: 20px; filter: invert(1);">
+            Continue with GitHub
+        </a>
+        
+        <p style="margin-top: 2rem; font-size: 0.9rem;">New here? <a href="signup.html" style="color: var(--primary); text-decoration:none; font-weight:bold;">Create Account</a></p>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        async function handleLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            try {
+                const res = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    localStorage.setItem('jwtToken', data.token);
+                    localStorage.setItem('userRole', data.role);
+                    localStorage.setItem('userEmail', email);
+                    window.location.href = "store.html";
+                } else { alert("Invalid Credentials"); }
+            } catch (e) { alert("Server connection failed"); }
+        }
+    </script>
+</body>
+</html>

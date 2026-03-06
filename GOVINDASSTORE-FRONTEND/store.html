@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><title>Store | Govindas</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="top-nav">
+        <h2 style="color: var(--primary); margin:0;">Govindas Store 🚩</h2>
+        <div class="nav-links">
+            <span id="user-name" style="font-weight:bold;"></span>
+            <a href="admin.html" id="admin-link" style="display:none">Admin</a>
+            <a href="orders.html">Orders</a>
+            <a href="cart.html">Cart 🛒</a>
+            <button class="btn btn-danger" onclick="App.logout()" style="margin-left:1rem">Logout</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="product-grid" id="p-grid"></div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        App.init();
+        window.onload = async () => {
+            const role = localStorage.getItem('userRole');
+            const email = localStorage.getItem('userEmail') || "Guest";
+            if(role === 'ADMIN') document.getElementById('admin-link').style.display = 'inline';
+            document.getElementById('user-name').innerText = "Hi, " + email.split('@')[0];
+            
+            const res = await fetch(`${API_URL}/products/store`);
+            const products = await res.json();
+            document.getElementById('p-grid').innerHTML = products.map(p => `
+                <div class="p-card">
+                    <img src="${p.imageUrl || 'https://via.placeholder.com/250'}" class="p-img">
+                    <div style="padding:1rem">
+                        <h4 style="margin:0.5rem 0">${p.name}</h4>
+                        <p style="color:var(--secondary); font-weight:bold; font-size:1.2rem">₹${p.price}</p>
+                        <p style="font-size:0.8rem; color:var(--text-muted)">Stock: ${p.stockQuantity}</p>
+                        <button class="btn btn-primary" onclick="addToCart(${p.id})" ${p.stockQuantity <= 0 ? 'disabled' : ''}>
+                            ${p.stockQuantity <= 0 ? 'Sold Out' : 'Add to Cart'}
+                        </button>
+                    </div>
+                </div>`).join('');
+        };
+    </script>
+</body>
+</html>
